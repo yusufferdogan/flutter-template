@@ -105,7 +105,7 @@ void provideDataSources() {
       secureStorage: injector.get<FlutterSecureStorage>(),
       box: injector.get<Box>()));
   injector.registerFactory<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(
-      dio: injector.get<NetworkService>().dio,
+      dio: (injector.get<NetworkService>() as DioNetworkService).dio,
       baseUrl: 'https://api.example.com'));
 }
 
