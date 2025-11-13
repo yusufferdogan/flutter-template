@@ -70,6 +70,13 @@ dependencies:
   youtube_player_iframe: ^4.0.4
   webview_flutter: ^4.2.4
   webview_flutter_wkwebview: ^3.7.4
+  # Authentication dependencies
+  firebase_auth: ^4.15.3
+  google_sign_in: ^6.1.6
+  sign_in_with_apple: ^5.0.0
+  flutter_secure_storage: ^9.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 
 
@@ -88,6 +95,7 @@ dev_dependencies:
   auto_route_generator: ^7.1.1
   isar_generator: ^3.1.0+1
   injectable_generator: ^2.4.0
+  hive_generator: ^2.0.1
 
 
 
