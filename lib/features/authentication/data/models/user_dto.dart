@@ -1,25 +1,47 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/user.dart';
 
-part 'user_dto.freezed.dart';
-part 'user_dto.g.dart';
+class UserDto {
+  final String id;
+  final String fullName;
+  final String email;
+  final String? profileImageUrl;
+  final bool isPremium;
+  final int credits;
+  final String createdAt;
 
-@freezed
-class UserDto with _$UserDto {
-  const UserDto._();
+  const UserDto({
+    required this.id,
+    required this.fullName,
+    required this.email,
+    this.profileImageUrl,
+    required this.isPremium,
+    required this.credits,
+    required this.createdAt,
+  });
 
-  const factory UserDto({
-    required String id,
-    required String fullName,
-    required String email,
-    String? profileImageUrl,
-    required bool isPremium,
-    required int credits,
-    required String createdAt,
-  }) = _UserDto;
+  factory UserDto.fromJson(Map<String, dynamic> json) {
+    return UserDto(
+      id: json['id'] as String,
+      fullName: json['fullName'] as String,
+      email: json['email'] as String,
+      profileImageUrl: json['profileImageUrl'] as String?,
+      isPremium: json['isPremium'] as bool,
+      credits: json['credits'] as int,
+      createdAt: json['createdAt'] as String,
+    );
+  }
 
-  factory UserDto.fromJson(Map<String, dynamic> json) =>
-      _$UserDtoFromJson(json);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'fullName': fullName,
+      'email': email,
+      'profileImageUrl': profileImageUrl,
+      'isPremium': isPremium,
+      'credits': credits,
+      'createdAt': createdAt,
+    };
+  }
 
   User toEntity() => User(
         id: id,
