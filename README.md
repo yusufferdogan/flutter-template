@@ -324,6 +324,30 @@ lib
         └── swipe_to_dismiss_wrap.dart
 ```
 
+## Figma MCP Integration
+
+This project includes configuration for Figma MCP (Model Context Protocol) integration, enabling AI-powered design-to-code workflows.
+
+### Setup Figma MCP
+
+1. Copy the MCP configuration to your Claude config directory:
+   ```bash
+   mkdir -p ~/.config/claude
+   cp .claude/mcp_config.json ~/.config/claude/claude_desktop_config.json
+   ```
+
+2. Get your Figma Personal Access Token from [Figma Settings](https://www.figma.com/settings)
+
+3. Update the config file with your token:
+   ```bash
+   # Replace YOUR_FIGMA_API_KEY_HERE with your actual token
+   sed -i 's/YOUR_FIGMA_API_KEY_HERE/your_actual_token/' ~/.config/claude/claude_desktop_config.json
+   ```
+
+4. Restart Claude Code to load the MCP server
+
+Now you can use Claude Code to fetch Figma designs directly by providing Figma URLs!
+
 ## Getting Started
 
 To set up the FilmKu Flutter Movie Application on your local machine, follow these steps:
