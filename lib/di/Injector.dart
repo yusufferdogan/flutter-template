@@ -31,6 +31,17 @@ import 'package:filmku/features/notifications/domain/repository/notifications_re
 import 'package:filmku/features/notifications/data/repository/notifications_repository_impl.dart';
 import 'package:filmku/features/notifications/domain/use_cases/clear_all_notifications_use_case.dart';
 import 'package:filmku/features/notifications/domain/use_cases/get_all_notifications_use_case.dart';
+import 'package:filmku/features/authentication/data/datasources/auth_local_datasource.dart';
+import 'package:filmku/features/authentication/data/datasources/auth_remote_datasource.dart';
+import 'package:filmku/features/authentication/data/repositories/auth_repository_impl.dart';
+import 'package:filmku/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:filmku/features/authentication/domain/usecases/sign_up_usecase.dart';
+import 'package:filmku/features/authentication/domain/usecases/sign_in_usecase.dart';
+import 'package:filmku/features/authentication/domain/usecases/sign_in_with_google_usecase.dart';
+import 'package:filmku/features/authentication/domain/usecases/sign_in_with_apple_usecase.dart';
+import 'package:filmku/features/authentication/domain/usecases/sign_out_usecase.dart';
+import 'package:filmku/features/authentication/domain/usecases/reset_password_usecase.dart';
+import 'package:filmku/features/authentication/presentation/bloc/authentication_bloc.dart';
 import 'package:filmku/shared/local/cache/local_db.dart';
 import 'package:filmku/shared/local/cache/local_db_impl.dart';
 import 'package:filmku/shared/local/shared_prefs/shared_pref.dart';
@@ -38,6 +49,10 @@ import 'package:filmku/shared/local/shared_prefs/shared_pref_impl.dart';
 import 'package:filmku/shared/network/dio_network_service.dart';
 import 'package:filmku/shared/network/network_service.dart';
 import 'package:get_it/get_it.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 
 final injector = GetIt.instance;
 
@@ -47,8 +62,19 @@ Future<void> initSingletons() async {
   injector.registerLazySingleton<NetworkService>(() => DioNetworkService());
   injector.registerLazySingleton<SharedPref>(() => SharedPrefImplementation());
 
+  //Authentication services
+  injector.registerLazySingleton<firebase_auth.FirebaseAuth>(
+      () => firebase_auth.FirebaseAuth.instance);
+  injector.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn());
+  injector.registerLazySingleton<FlutterSecureStorage>(
+      () => const FlutterSecureStorage());
+
   //initiating db
   await injector<LocalDb>().initDb();
+
+  //Initialize Hive for auth
+  final authBox = await Hive.openBox('auth_box');
+  injector.registerLazySingleton<Box>(() => authBox);
 }
 
 void provideDataSources() {
@@ -73,6 +99,14 @@ void provideDataSources() {
   //Notification
   injector.registerFactory<NotificationsLocalDataSource>(
           () => NotificationsLocalDataSourceImpl(localDb: injector.get<LocalDb>()));
+
+  //Authentication
+  injector.registerFactory<AuthLocalDataSource>(() => AuthLocalDataSourceImpl(
+      secureStorage: injector.get<FlutterSecureStorage>(),
+      box: injector.get<Box>()));
+  injector.registerFactory<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(
+      dio: injector.get<NetworkService>().dio,
+      baseUrl: 'https://api.example.com'));
 }
 
 void provideRepositories() {
@@ -96,6 +130,13 @@ void provideRepositories() {
   //Notification
   injector.registerFactory<NotificationRepository>(() => NotificationRepositoryImpl(
       notificationsLocalDataSource: injector.get<NotificationsLocalDataSource>()));
+
+  //Authentication
+  injector.registerFactory<AuthRepository>(() => AuthRepositoryImpl(
+      remoteDataSource: injector.get<AuthRemoteDataSource>(),
+      localDataSource: injector.get<AuthLocalDataSource>(),
+      firebaseAuth: injector.get<firebase_auth.FirebaseAuth>(),
+      googleSignIn: injector.get<GoogleSignIn>()));
 }
 
 void provideUseCases() {
@@ -122,9 +163,24 @@ void provideUseCases() {
   injector.registerFactory<GetAllNotificationsUseCase>(() => GetAllNotificationsUseCase(notificationRepository: injector.get<NotificationRepository>()));
   injector.registerFactory<ClearAllNotificationsUseCase>(() => ClearAllNotificationsUseCase(notificationRepository: injector.get<NotificationRepository>()));
 
+  //Authentication
+  injector.registerFactory<SignUpUseCase>(() => SignUpUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignInUseCase>(() => SignInUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignInWithGoogleUseCase>(() => SignInWithGoogleUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignInWithAppleUseCase>(() => SignInWithAppleUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignOutUseCase>(() => SignOutUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<ResetPasswordUseCase>(() => ResetPasswordUseCase(injector.get<AuthRepository>()));
+}
 
-
-
-
+void provideBlocs() {
+  //Authentication
+  injector.registerFactory<AuthenticationBloc>(() => AuthenticationBloc(
+      signUpUseCase: injector.get<SignUpUseCase>(),
+      signInUseCase: injector.get<SignInUseCase>(),
+      signInWithGoogleUseCase: injector.get<SignInWithGoogleUseCase>(),
+      signInWithAppleUseCase: injector.get<SignInWithAppleUseCase>(),
+      signOutUseCase: injector.get<SignOutUseCase>(),
+      resetPasswordUseCase: injector.get<ResetPasswordUseCase>(),
+      authRepository: injector.get<AuthRepository>()));
 }
 
