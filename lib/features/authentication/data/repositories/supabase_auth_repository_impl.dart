@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import 'package:supabase_flutter/supabase_flutter.dart' hide User, AuthState;
 import '../../../../core/supabase/supabase_config.dart';
 import '../../domain/entities/auth_failure.dart';
 import '../../domain/entities/user.dart';
-import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/auth_repository.dart' as domain;
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/supabase_auth_remote_datasource.dart';
 
 /// Supabase implementation of authentication repository
-class SupabaseAuthRepositoryImpl implements AuthRepository {
+class SupabaseAuthRepositoryImpl implements domain.AuthRepository {
   final SupabaseAuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
   final SupabaseClient supabase;
@@ -197,12 +197,12 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Stream<AuthState> get authStateChanges {
+  Stream<domain.AuthState> get authStateChanges {
     return supabase.auth.onAuthStateChange.map((state) {
       if (state.session != null) {
-        return AuthState.authenticated;
+        return domain.AuthState.authenticated;
       } else {
-        return AuthState.unauthenticated;
+        return domain.AuthState.unauthenticated;
       }
     });
   }
