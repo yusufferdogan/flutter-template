@@ -26,6 +26,8 @@ class InitDbImpl extends LocalDb {
 
   @override
   Future<void> cleanDb() async {
-    await db.writeTxn(() => cleanDb());
+    await db.writeTxn(() async {
+      await db.clear();
+    });
   }
 }
