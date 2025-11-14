@@ -50,7 +50,8 @@ class _SignInScreenState extends State<SignInScreen> {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Invalid email format';
     }
@@ -67,7 +68,7 @@ class _SignInScreenState extends State<SignInScreen> {
   void _signIn() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthenticationBloc>().add(
-            AuthenticationEvent.signInRequested(
+            SignInRequested(
               email: _emailController.text.trim(),
               password: _passwordController.text,
             ),
@@ -102,7 +103,7 @@ class _SignInScreenState extends State<SignInScreen> {
           TextButton(
             onPressed: () {
               context.read<AuthenticationBloc>().add(
-                    AuthenticationEvent.resetPasswordRequested(
+                    ResetPasswordRequested(
                       _emailController.text.trim(),
                     ),
                   );
@@ -129,28 +130,23 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
       body: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
-          state.maybeWhen(
-            authenticated: (user) {
-              context.go('/home');
-            },
-            error: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            passwordResetSent: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Password reset link sent to your email'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            orElse: () {},
-          );
+          if (state is Authenticated) {
+            context.go('/home');
+          } else if (state is Error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is PasswordResetSent) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Password reset link sent to your email'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
         },
         child: SafeArea(
           child: SingleChildScrollView(

@@ -31,7 +31,7 @@ class AuthenticationBloc
     required this.signOutUseCase,
     required this.resetPasswordUseCase,
     required this.authRepository,
-  }) : super(const AuthenticationState.initial()) {
+  }) : super(const Initial()) {
     on<SignUpRequested>(_onSignUpRequested);
     on<SignInRequested>(_onSignInRequested);
     on<SignInWithGoogleRequested>(_onSignInWithGoogleRequested);
@@ -42,9 +42,10 @@ class AuthenticationBloc
     on<CheckAuthStatus>(_onCheckAuthStatus);
 
     // Listen to auth state changes
-    _authStateSubscription = authRepository.authStateChanges.listen((authState) {
+    _authStateSubscription =
+        authRepository.authStateChanges.listen((authState) {
       if (authState == AuthState.unauthenticated) {
-        add(const AuthenticationEvent.authStateChanged(null));
+        add(const AuthStateChanged(null));
       }
     });
   }
@@ -53,7 +54,7 @@ class AuthenticationBloc
     SignUpRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await signUpUseCase(
       fullName: event.fullName,
@@ -62,8 +63,8 @@ class AuthenticationBloc
     );
 
     result.fold(
-      (failure) => emit(AuthenticationState.error(_mapFailureToMessage(failure))),
-      (user) => emit(AuthenticationState.authenticated(user)),
+      (failure) => emit(Error(_mapFailureToMessage(failure))),
+      (user) => emit(Authenticated(user)),
     );
   }
 
@@ -71,7 +72,7 @@ class AuthenticationBloc
     SignInRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await signInUseCase(
       email: event.email,
@@ -79,8 +80,8 @@ class AuthenticationBloc
     );
 
     result.fold(
-      (failure) => emit(AuthenticationState.error(_mapFailureToMessage(failure))),
-      (user) => emit(AuthenticationState.authenticated(user)),
+      (failure) => emit(Error(_mapFailureToMessage(failure))),
+      (user) => emit(Authenticated(user)),
     );
   }
 
@@ -88,13 +89,13 @@ class AuthenticationBloc
     SignInWithGoogleRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await signInWithGoogleUseCase();
 
     result.fold(
-      (failure) => emit(AuthenticationState.error(_mapFailureToMessage(failure))),
-      (user) => emit(AuthenticationState.authenticated(user)),
+      (failure) => emit(Error(_mapFailureToMessage(failure))),
+      (user) => emit(Authenticated(user)),
     );
   }
 
@@ -102,13 +103,13 @@ class AuthenticationBloc
     SignInWithAppleRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await signInWithAppleUseCase();
 
     result.fold(
-      (failure) => emit(AuthenticationState.error(_mapFailureToMessage(failure))),
-      (user) => emit(AuthenticationState.authenticated(user)),
+      (failure) => emit(Error(_mapFailureToMessage(failure))),
+      (user) => emit(Authenticated(user)),
     );
   }
 
@@ -116,13 +117,13 @@ class AuthenticationBloc
     SignOutRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await signOutUseCase();
 
     result.fold(
-      (failure) => emit(AuthenticationState.error(_mapFailureToMessage(failure))),
-      (_) => emit(const AuthenticationState.unauthenticated()),
+      (failure) => emit(Error(_mapFailureToMessage(failure))),
+      (_) => emit(const Unauthenticated()),
     );
   }
 
@@ -130,13 +131,13 @@ class AuthenticationBloc
     ResetPasswordRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await resetPasswordUseCase(event.email);
 
     result.fold(
-      (failure) => emit(AuthenticationState.error(_mapFailureToMessage(failure))),
-      (_) => emit(const AuthenticationState.passwordResetSent()),
+      (failure) => emit(Error(_mapFailureToMessage(failure))),
+      (_) => emit(const PasswordResetSent()),
     );
   }
 
@@ -145,9 +146,9 @@ class AuthenticationBloc
     Emitter<AuthenticationState> emit,
   ) async {
     if (event.user != null) {
-      emit(AuthenticationState.authenticated(event.user!));
+      emit(Authenticated(event.user!));
     } else {
-      emit(const AuthenticationState.unauthenticated());
+      emit(const Unauthenticated());
     }
   }
 
@@ -155,17 +156,17 @@ class AuthenticationBloc
     CheckAuthStatus event,
     Emitter<AuthenticationState> emit,
   ) async {
-    emit(const AuthenticationState.loading());
+    emit(const Loading());
 
     final result = await authRepository.getCurrentUser();
 
     result.fold(
-      (failure) => emit(const AuthenticationState.unauthenticated()),
+      (failure) => emit(const Unauthenticated()),
       (user) {
         if (user != null) {
-          emit(AuthenticationState.authenticated(user));
+          emit(Authenticated(user));
         } else {
-          emit(const AuthenticationState.unauthenticated());
+          emit(const Unauthenticated());
         }
       },
     );
@@ -177,7 +178,9 @@ class AuthenticationBloc
       emailAlreadyExists: () => 'An account with this email already exists',
       weakPassword: () => 'Password must be at least 8 characters',
       networkError: () => 'Please check your internet connection',
-      serverError: (message) => message.isNotEmpty ? message : 'Something went wrong. Please try again',
+      serverError: (message) => message.isNotEmpty
+          ? message
+          : 'Something went wrong. Please try again',
       oauthCancelled: () => 'Sign in was cancelled',
       oauthFailed: (message) => 'Sign in failed: $message',
       unknown: (message) => message,

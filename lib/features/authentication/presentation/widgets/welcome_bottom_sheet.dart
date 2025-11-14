@@ -15,21 +15,17 @@ class WelcomeBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
-        state.maybeWhen(
-          authenticated: (user) {
-            Navigator.of(context).pop();
-            context.go('/home');
-          },
-          error: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          },
-          orElse: () {},
-        );
+        if (state is Authenticated) {
+          Navigator.of(context).pop();
+          context.go('/home');
+        } else if (state is Error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       },
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -106,8 +102,7 @@ class WelcomeBottomSheet extends StatelessWidget {
                               ? () {}
                               : () {
                                   context.read<AuthenticationBloc>().add(
-                                        const AuthenticationEvent
-                                            .signInWithAppleRequested(),
+                                        const SignInWithAppleRequested(),
                                       );
                                 },
                         );
@@ -124,8 +119,7 @@ class WelcomeBottomSheet extends StatelessWidget {
                               ? () {}
                               : () {
                                   context.read<AuthenticationBloc>().add(
-                                        const AuthenticationEvent
-                                            .signInWithGoogleRequested(),
+                                        const SignInWithGoogleRequested(),
                                       );
                                 },
                         );

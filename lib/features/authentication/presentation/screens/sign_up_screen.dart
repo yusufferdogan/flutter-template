@@ -58,7 +58,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Invalid email format';
     }
@@ -98,7 +99,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void _signUp() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthenticationBloc>().add(
-            AuthenticationEvent.signUpRequested(
+            SignUpRequested(
               fullName: _fullNameController.text.trim(),
               email: _emailController.text.trim(),
               password: _passwordController.text,
@@ -121,20 +122,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
       body: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
-          state.maybeWhen(
-            authenticated: (user) {
-              context.go('/home');
-            },
-            error: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            orElse: () {},
-          );
+          if (state is Authenticated) {
+            context.go('/home');
+          } else if (state is Error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         },
         child: SafeArea(
           child: SingleChildScrollView(

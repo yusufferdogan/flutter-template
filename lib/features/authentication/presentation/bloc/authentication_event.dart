@@ -1,34 +1,11 @@
+import 'package:equatable/equatable.dart';
 import '../../domain/entities/user.dart';
 
-sealed class AuthenticationEvent {
+abstract class AuthenticationEvent extends Equatable {
   const AuthenticationEvent();
 
-  const factory AuthenticationEvent.signUpRequested({
-    required String fullName,
-    required String email,
-    required String password,
-  }) = SignUpRequested;
-
-  const factory AuthenticationEvent.signInRequested({
-    required String email,
-    required String password,
-  }) = SignInRequested;
-
-  const factory AuthenticationEvent.signInWithGoogleRequested() =
-      SignInWithGoogleRequested;
-
-  const factory AuthenticationEvent.signInWithAppleRequested() =
-      SignInWithAppleRequested;
-
-  const factory AuthenticationEvent.signOutRequested() = SignOutRequested;
-
-  const factory AuthenticationEvent.resetPasswordRequested(String email) =
-      ResetPasswordRequested;
-
-  const factory AuthenticationEvent.authStateChanged(User? user) =
-      AuthStateChanged;
-
-  const factory AuthenticationEvent.checkAuthStatus() = CheckAuthStatus;
+  @override
+  List<Object?> get props => [];
 }
 
 class SignUpRequested extends AuthenticationEvent {
@@ -41,6 +18,9 @@ class SignUpRequested extends AuthenticationEvent {
     required this.email,
     required this.password,
   });
+
+  @override
+  List<Object?> get props => [fullName, email, password];
 }
 
 class SignInRequested extends AuthenticationEvent {
@@ -51,6 +31,9 @@ class SignInRequested extends AuthenticationEvent {
     required this.email,
     required this.password,
   });
+
+  @override
+  List<Object?> get props => [email, password];
 }
 
 class SignInWithGoogleRequested extends AuthenticationEvent {
@@ -69,12 +52,18 @@ class ResetPasswordRequested extends AuthenticationEvent {
   final String email;
 
   const ResetPasswordRequested(this.email);
+
+  @override
+  List<Object?> get props => [email];
 }
 
 class AuthStateChanged extends AuthenticationEvent {
   final User? user;
 
   const AuthStateChanged(this.user);
+
+  @override
+  List<Object?> get props => [user];
 }
 
 class CheckAuthStatus extends AuthenticationEvent {

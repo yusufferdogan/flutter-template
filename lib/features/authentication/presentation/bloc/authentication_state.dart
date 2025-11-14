@@ -1,14 +1,11 @@
+import 'package:equatable/equatable.dart';
 import '../../domain/entities/user.dart';
 
-sealed class AuthenticationState {
+abstract class AuthenticationState extends Equatable {
   const AuthenticationState();
 
-  const factory AuthenticationState.initial() = Initial;
-  const factory AuthenticationState.loading() = Loading;
-  const factory AuthenticationState.authenticated(User user) = Authenticated;
-  const factory AuthenticationState.unauthenticated() = Unauthenticated;
-  const factory AuthenticationState.error(String message) = Error;
-  const factory AuthenticationState.passwordResetSent() = PasswordResetSent;
+  @override
+  List<Object?> get props => [];
 }
 
 class Initial extends AuthenticationState {
@@ -22,6 +19,9 @@ class Loading extends AuthenticationState {
 class Authenticated extends AuthenticationState {
   final User user;
   const Authenticated(this.user);
+
+  @override
+  List<Object?> get props => [user];
 }
 
 class Unauthenticated extends AuthenticationState {
@@ -31,6 +31,9 @@ class Unauthenticated extends AuthenticationState {
 class Error extends AuthenticationState {
   final String message;
   const Error(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class PasswordResetSent extends AuthenticationState {
