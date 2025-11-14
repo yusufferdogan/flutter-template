@@ -3,6 +3,10 @@ import 'package:filmku/app/app_configs.dart';
 import 'package:filmku/features/home/data/datasource/local/home_local_datasource.dart';
 import 'package:filmku/features/home/data/datasource/remote/home_remote_data_source.dart';
 import 'package:filmku/features/home/domain/repositories/home_repository.dart';
+import 'package:filmku/features/home/domain/entities/community_image.dart';
+import 'package:filmku/features/home/domain/entities/style.dart';
+import 'package:filmku/features/home/domain/entities/template.dart';
+import 'package:filmku/features/home/domain/failures/home_failure.dart';
 import 'package:filmku/models/domain/movies.dart';
 import 'package:filmku/models/genres.dart';
 import 'package:filmku/models/movie.dart';
@@ -15,6 +19,28 @@ class HomeRepositoryImpl extends HomeRepository {
   final HomeLocalDataSource homeLocalDataSource;
 
   HomeRepositoryImpl({required this.homeRemoteDataSource, required this.homeLocalDataSource});
+
+  // New AI Image Generator methods (not yet implemented)
+  @override
+  Future<Either<HomeFailure, List<Style>>> getTrendingStyles() {
+    throw UnimplementedError('getTrendingStyles will be implemented in Phase 1');
+  }
+
+  @override
+  Future<Either<HomeFailure, List<Template>>> getTemplates({int limit = 10}) {
+    throw UnimplementedError('getTemplates will be implemented in Phase 1');
+  }
+
+  @override
+  Future<Either<HomeFailure, List<CommunityImage>>> getCommunityImages({
+    String? category,
+    int page = 1,
+    int limit = 20,
+  }) {
+    throw UnimplementedError('getCommunityImages will be implemented in Phase 1');
+  }
+
+  // Legacy FilmKu movie methods (existing implementation)
 
   @override
   Future<Either<AppException, Movies>> fetchAndCacheMovies(
