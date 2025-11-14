@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:filmku/core/app_observers.dart';
+import 'package:filmku/core/supabase/supabase_config.dart';
 
 import 'core/app.dart';
 import 'di/Injector.dart';
@@ -12,6 +13,10 @@ void main() => runMain();
 Future<void> runMain() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await SupabaseConfig.initialize();
+
   await initSingletons();
   provideDataSources();
   provideRepositories();
