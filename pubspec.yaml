@@ -77,6 +77,8 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  # Supabase backend
+  supabase_flutter: ^2.0.0
 
 
 
