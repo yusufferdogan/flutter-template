@@ -3,14 +3,22 @@ import 'package:filmku/features/home/data/datasource/remote/home_remote_data_sou
 import 'package:filmku/models/response/genre_response.dart';
 import 'package:filmku/models/response/movies_response.dart';
 import 'package:filmku/shared/network/network_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:filmku/shared/network/network_values.dart';
 import 'package:filmku/shared/util/app_exception.dart';
+import '../../models/style_dto.dart';
+import '../../models/template_dto.dart';
+import '../../models/community_image_dto.dart';
 
 class HomeRemoteDataSourceImpl extends HomeRemoteDataSource {
   final NetworkService networkService;
+  final SupabaseClient supabaseClient;
 
-  HomeRemoteDataSourceImpl({required this.networkService});
+  HomeRemoteDataSourceImpl({
+    required this.networkService,
+    required this.supabaseClient,
+  });
 
   @override
   Future<Either<AppException, MoviesResponse>> getMovies(
@@ -51,5 +59,68 @@ class HomeRemoteDataSourceImpl extends HomeRemoteDataSource {
       final genresResponse = GenreResponse(jsonData['genres'] ?? []);
       return Right(genresResponse);
     });
+  }
+
+  // New AI Image Generator methods
+
+  @override
+  Future<List<StyleDto>> getTrendingStyles() async {
+    try {
+      final response = await supabaseClient
+          .from('trending_styles')
+          .select()
+          .order('usage_count', ascending: false)
+          .limit(4);
+
+      return (response as List)
+          .map((json) => StyleDto.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch trending styles: $e');
+    }
+  }
+
+  @override
+  Future<List<TemplateDto>> getTemplates({int limit = 10}) async {
+    try {
+      final response = await supabaseClient
+          .from('templates')
+          .select()
+          .limit(limit);
+
+      return (response as List)
+          .map((json) => TemplateDto.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch templates: $e');
+    }
+  }
+
+  @override
+  Future<List<CommunityImageDto>> getCommunityImages({
+    String? category,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      var query = supabaseClient
+          .from('community_images')
+          .select()
+          .order('created_at', ascending: false);
+
+      if (category != null && category.toLowerCase() != 'all') {
+        query = query.eq('category', category);
+      }
+
+      final offset = (page - 1) * limit;
+      final response = await query.range(offset, offset + limit - 1);
+
+      return (response as List)
+          .map((json) =>
+              CommunityImageDto.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch community images: $e');
+    }
   }
 }
