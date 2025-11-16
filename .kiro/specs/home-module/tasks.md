@@ -8,7 +8,7 @@ This implementation plan covers the development of the Home module, including th
 
 ## Tasks
 
-- [ ] 1. Create domain layer entities
+- [x] 1. Create domain layer entities
 
   - Define StyleType enum
   - Create Style entity with freezed
@@ -16,7 +16,7 @@ This implementation plan covers the development of the Home module, including th
   - Create CommunityImage entity with freezed
   - _Requirements: 1, 4, 5, 6_
 
-- [ ] 2. Create HomeRepository interface
+- [x] 2. Create HomeRepository interface
 
   - Define getTrendingStyles method
   - Define getTemplates method with pagination
