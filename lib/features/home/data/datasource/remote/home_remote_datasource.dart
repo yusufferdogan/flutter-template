@@ -103,17 +103,20 @@ class HomeRemoteDataSourceImpl extends HomeRemoteDataSource {
     int limit = 20,
   }) async {
     try {
+      final offset = (page - 1) * limit;
+
       var query = supabaseClient
           .from('community_images')
-          .select()
-          .order('created_at', ascending: false);
+          .select();
 
+      // Apply filter before ordering
       if (category != null && category.toLowerCase() != 'all') {
         query = query.eq('category', category);
       }
 
-      final offset = (page - 1) * limit;
-      final response = await query.range(offset, offset + limit - 1);
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
 
       return (response as List)
           .map((json) =>

@@ -67,7 +67,7 @@ class ImageGeneratorCard extends StatelessWidget {
                     child: Ink(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF7C3AED), Color(0xFF DB2777)],
+                          colors: [Color(0xFF7C3AED), Color(0xFFDB2777)],
                         ),
                         borderRadius: BorderRadius.circular(20.r),
                       ),

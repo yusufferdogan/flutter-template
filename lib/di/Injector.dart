@@ -52,6 +52,8 @@ import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final injector = GetIt.instance;
 
@@ -75,9 +77,13 @@ Future<void> initSingletons() async {
 void provideDataSources() {
   //Home
   injector.registerFactory<HomeLocalDataSource>(
-      () => HomeLocalDataSourceImpl(localDb: injector.get<LocalDb>()));
+      () => HomeLocalDataSourceImpl(
+          localDb: injector.get<LocalDb>(),
+          sharedPreferences: injector.get<SharedPreferences>()));
   injector.registerFactory<HomeRemoteDataSource>(() =>
-      HomeRemoteDataSourceImpl(networkService: injector.get<NetworkService>()));
+      HomeRemoteDataSourceImpl(
+          networkService: injector.get<NetworkService>(),
+          supabaseClient: injector.get<SupabaseClient>()));
 
   //MovieDetail
   injector.registerFactory<MovieDetailRemoteDataSource>(() =>
