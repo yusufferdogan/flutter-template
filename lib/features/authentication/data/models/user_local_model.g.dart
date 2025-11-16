@@ -15,7 +15,7 @@ extension GetUserLocalModelCollection on Isar {
 
 const UserLocalModelSchema = CollectionSchema(
   name: r'UserLocalModel',
-  id: -8234567890123456789,
+  id: 3847561928374561829,
   properties: {
     r'userId': PropertySchema(
       id: 0,
@@ -60,7 +60,7 @@ const UserLocalModelSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'userId': IndexSchema(
-      id: -1234567890123456789,
+      id: 7291834756192837456,
       name: r'userId',
       unique: true,
       replace: false,
@@ -317,7 +317,6 @@ extension UserLocalModelQueryFilter
       ));
     });
   }
-}
 
   QueryBuilder<UserLocalModel, UserLocalModel, QAfterFilterCondition>
       userIdEqualTo(

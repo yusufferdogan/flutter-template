@@ -20,7 +20,7 @@ class InitDbImpl extends LocalDb {
         GenresSchema,
         MovieDetailSchema,
         NotificationModelSchema,
-        UserLocalModelSchema,
+        // UserLocalModelSchema, // TODO: Re-enable after fixing schema generation with build_runner
       ],
       directory: dir.path,
     );
