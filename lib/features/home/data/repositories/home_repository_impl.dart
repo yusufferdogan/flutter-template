@@ -20,15 +20,47 @@ class HomeRepositoryImpl extends HomeRepository {
 
   HomeRepositoryImpl({required this.homeRemoteDataSource, required this.homeLocalDataSource});
 
-  // New AI Image Generator methods (not yet implemented)
+  // New AI Image Generator methods
   @override
-  Future<Either<HomeFailure, List<Style>>> getTrendingStyles() {
-    throw UnimplementedError('getTrendingStyles will be implemented in Phase 1');
+  Future<Either<HomeFailure, List<Style>>> getTrendingStyles() async {
+    try {
+      // Try to get from cache first
+      final cachedStyles = await homeLocalDataSource.getCachedTrendingStyles();
+      if (cachedStyles != null && cachedStyles.isNotEmpty) {
+        return Right(cachedStyles.map((dto) => dto.toEntity()).toList());
+      }
+
+      // If cache miss or expired, fetch from remote
+      final styles = await homeRemoteDataSource.getTrendingStyles();
+
+      // Cache the results
+      await homeLocalDataSource.cacheTrendingStyles(styles: styles);
+
+      return Right(styles.map((dto) => dto.toEntity()).toList());
+    } catch (e) {
+      return Left(HomeFailure.server(e.toString()));
+    }
   }
 
   @override
-  Future<Either<HomeFailure, List<Template>>> getTemplates({int limit = 10}) {
-    throw UnimplementedError('getTemplates will be implemented in Phase 1');
+  Future<Either<HomeFailure, List<Template>>> getTemplates({int limit = 10}) async {
+    try {
+      // Try to get from cache first
+      final cachedTemplates = await homeLocalDataSource.getCachedTemplates();
+      if (cachedTemplates != null && cachedTemplates.isNotEmpty) {
+        return Right(cachedTemplates.map((dto) => dto.toEntity()).toList());
+      }
+
+      // If cache miss or expired, fetch from remote
+      final templates = await homeRemoteDataSource.getTemplates(limit: limit);
+
+      // Cache the results
+      await homeLocalDataSource.cacheTemplates(templates: templates);
+
+      return Right(templates.map((dto) => dto.toEntity()).toList());
+    } catch (e) {
+      return Left(HomeFailure.server(e.toString()));
+    }
   }
 
   @override
@@ -36,8 +68,37 @@ class HomeRepositoryImpl extends HomeRepository {
     String? category,
     int page = 1,
     int limit = 20,
-  }) {
-    throw UnimplementedError('getCommunityImages will be implemented in Phase 1');
+  }) async {
+    try {
+      final categoryKey = category ?? 'All';
+
+      // Try to get from cache first
+      final cachedImages = await homeLocalDataSource.getCachedCommunityImages(
+        category: categoryKey,
+        page: page,
+      );
+      if (cachedImages != null && cachedImages.isNotEmpty) {
+        return Right(cachedImages.map((dto) => dto.toEntity()).toList());
+      }
+
+      // If cache miss or expired, fetch from remote
+      final images = await homeRemoteDataSource.getCommunityImages(
+        category: category,
+        page: page,
+        limit: limit,
+      );
+
+      // Cache the results
+      await homeLocalDataSource.cacheCommunityImages(
+        images: images,
+        category: categoryKey,
+        page: page,
+      );
+
+      return Right(images.map((dto) => dto.toEntity()).toList());
+    } catch (e) {
+      return Left(HomeFailure.server(e.toString()));
+    }
   }
 
   // Legacy FilmKu movie methods (existing implementation)
