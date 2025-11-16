@@ -7,6 +7,7 @@ The home module foundation has been started with new domain entities for the AI 
 ## What's Been Created
 
 ### ✅ Domain Layer - Entities
+
 - `lib/features/home/domain/entities/style.dart` - Art style entity (Photo, Anime, Illustration, etc.)
 - `lib/features/home/domain/entities/template.dart` - Image template entity
 - `lib/features/home/domain/entities/community_image.dart` - Community shared image entity
@@ -14,7 +15,9 @@ The home module foundation has been started with new domain entities for the AI 
 - `lib/features/home/domain/repositories/home_repository.dart` - Repository interface (updated)
 
 ### 📋 Existing Files (From FilmKu Movie App)
+
 The following files exist but are for the old movie application and need to be updated or replaced:
+
 - Data sources (remote/local)
 - Repository implementation
 - Use cases (movie/genre related)
@@ -26,7 +29,9 @@ The following files exist but are for the old movie application and need to be u
 ### Phase 1: Data Layer (High Priority)
 
 #### 1.1 Create DTOs
+
 Create `/lib/features/home/data/models/`:
+
 - `style_dto.dart` - Maps to `styles` table in Supabase
 - `template_dto.dart` - Maps to `templates` table in Supabase
 - `community_image_dto.dart` - Maps to `generated_images` table in Supabase
@@ -46,9 +51,11 @@ class StyleDto {
 ```
 
 #### 1.2 Update HomeRemoteDataSource
+
 File: `lib/features/home/data/datasource/remote/home_remote_datasource.dart`
 
 Replace movie API calls with Supabase queries:
+
 ```dart
 abstract class HomeRemoteDataSource {
   Future<List<StyleDto>> getTrendingStyles();
@@ -82,9 +89,11 @@ class SupabaseHomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 ```
 
 #### 1.3 Update HomeLocalDataSource
+
 File: `lib/features/home/data/datasource/local/home_local_datasource.dart`
 
-Implement caching with Isar or Hive:
+Implement caching with Isar:
+
 ```dart
 abstract class HomeLocalDataSource {
   Future<List<StyleDto>> getCachedStyles();
@@ -98,9 +107,11 @@ abstract class HomeLocalDataSource {
 ```
 
 #### 1.4 Update HomeRepository
+
 File: `lib/features/home/data/repositories/home_repository_impl.dart`
 
 Implement cache-first strategy:
+
 ```dart
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource remoteDataSource;
@@ -132,7 +143,9 @@ class HomeRepositoryImpl implements HomeRepository {
 ### Phase 2: Domain Layer (High Priority)
 
 #### 2.1 Create Use Cases
+
 Create `/lib/features/home/domain/usecases/`:
+
 - `get_trending_styles_usecase.dart`
 - `get_templates_usecase.dart`
 - `get_community_images_usecase.dart`
@@ -153,6 +166,7 @@ class GetTrendingStylesUseCase {
 ### Phase 3: Presentation Layer - State Management
 
 #### 3.1 Create HomeBloc
+
 File: `lib/features/home/presentation/bloc/home/home_bloc.dart`
 
 ```dart
@@ -196,9 +210,11 @@ class HomeState {
 ### Phase 4: Presentation Layer - UI Components
 
 #### 4.1 Core Widgets
+
 Create `/lib/features/home/presentation/widgets/`:
 
 **image_generator_card.dart**
+
 - Gradient background card
 - Title: "Image Generator"
 - Subtitle: "Turn your ideas into stunning images"
@@ -206,28 +222,33 @@ Create `/lib/features/home/presentation/widgets/`:
 - Navigate to prompt screen on tap
 
 **style_card.dart**
+
 - Dark background (#1E1C28)
 - 70x70 preview image
 - Style name label
 - 8px border radius
 
 **template_card.dart**
+
 - 118x151 preview image
 - 10px border radius
 - Navigate with template data on tap
 
 **community_image_grid.dart**
+
 - Two-column masonry layout
 - Lazy loading with pagination
 - Pull-to-refresh
 - Shimmer loading
 
 **category_filter_chips.dart**
+
 - Chips: All, Characters, Photography, Illustrations
 - Gradient background for selected
 - Border for unselected
 
 **bottom_nav_bar.dart**
+
 - 4 tabs: Home, Explore, Notification, Profile
 - Gradient background for active tab
 - Notification badge support
@@ -236,6 +257,7 @@ Create `/lib/features/home/presentation/widgets/`:
 #### 4.2 Main Screens
 
 **home_screen.dart**
+
 - Scrollable page with gradient background
 - Image Generator Card (top)
 - "Try Trend Styles" section with 4 style cards
@@ -245,6 +267,7 @@ Create `/lib/features/home/presentation/widgets/`:
 - Loading/error states
 
 **main_shell.dart**
+
 - Bottom navigation wrapper
 - IndexedStack to preserve tab state
 - Tab switching logic
@@ -252,6 +275,7 @@ Create `/lib/features/home/presentation/widgets/`:
 ### Phase 5: Integration & Navigation
 
 #### 5.1 Update Dependency Injection
+
 File: `lib/di/Injector.dart`
 
 ```dart
@@ -288,6 +312,7 @@ void provideBlocs() {
 ```
 
 #### 5.2 Update Routing
+
 Configure GoRouter with MainShell and bottom navigation.
 
 ### Phase 6: Supabase Integration
@@ -295,6 +320,7 @@ Configure GoRouter with MainShell and bottom navigation.
 #### 6.1 Query Examples
 
 **Get Trending Styles:**
+
 ```dart
 final styles = await supabase
     .from('styles')
@@ -305,6 +331,7 @@ final styles = await supabase
 ```
 
 **Get Templates:**
+
 ```dart
 final templates = await supabase
     .from('templates')
@@ -314,6 +341,7 @@ final templates = await supabase
 ```
 
 **Get Community Images:**
+
 ```dart
 var query = supabase
     .from('generated_images')
@@ -332,17 +360,20 @@ final images = await query
 ### Phase 7: Testing
 
 #### 7.1 Unit Tests
+
 - Test domain entities
 - Test use cases with mocked repositories
 - Test BLoC state transitions
 - Test DTO to Entity conversions
 
 #### 7.2 Widget Tests
+
 - Test each UI component
 - Test navigation handlers
 - Test loading/error states
 
 #### 7.3 Integration Tests
+
 - Test complete home screen flow
 - Test filter and pagination
 - Test tab navigation
@@ -350,11 +381,13 @@ final images = await query
 ## Migration Strategy
 
 ### Option A: Replace Existing Module
+
 1. Backup old home module files
 2. Delete old movie-related code
 3. Implement new AI image generator home module
 
 ### Option B: Coexist Temporarily
+
 1. Keep old movie home in different namespace
 2. Implement new home module
 3. Switch routing to new module
@@ -365,15 +398,18 @@ final images = await query
 ## Progress Tracking
 
 ### ✅ Completed
+
 - Domain entities (Style, Template, CommunityImage)
 - HomeFailure error handling
 - HomeRepository interface
 
 ### 🚧 In Progress
+
 - Data layer DTOs
 - Data sources implementation
 
 ### ⏳ Pending
+
 - Repository implementation
 - Use cases
 - BLoC implementation
@@ -386,6 +422,7 @@ final images = await query
 To continue implementation:
 
 1. **Create DTOs** (Priority 1)
+
    ```bash
    # Create models directory
    mkdir -p lib/features/home/data/models
@@ -393,17 +430,21 @@ To continue implementation:
    ```
 
 2. **Update Data Sources** (Priority 2)
+
    - Replace movie API calls with Supabase queries
    - Implement caching strategy
 
 3. **Create Use Cases** (Priority 3)
+
    - Simple wrapper classes around repository methods
 
 4. **Implement BLoC** (Priority 4)
+
    - Define events and states
    - Implement event handlers
 
 5. **Build UI** (Priority 5)
+
    - Start with ImageGeneratorCard
    - Build other widgets incrementally
    - Assemble HomeScreen

@@ -1,7 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
+import '../../../../shared/local/cache/local_db.dart';
 import '../models/user_dto.dart';
-import 'dart:convert';
+import '../models/user_local_model.dart';
 
 abstract class AuthLocalDataSource {
   Future<void> saveTokens({
@@ -24,15 +25,14 @@ abstract class AuthLocalDataSource {
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final FlutterSecureStorage secureStorage;
-  final Box box;
+  final LocalDb localDb;
 
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
-  static const String _userKey = 'user';
 
   AuthLocalDataSourceImpl({
     required this.secureStorage,
-    required this.box,
+    required this.localDb,
   });
 
   @override
@@ -66,25 +66,46 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> saveUser(UserDto user) async {
-    final userJson = json.encode(user.toJson());
-    await box.put(_userKey, userJson);
+    try {
+      final isar = localDb.getDb();
+      final userLocalModel = UserLocalModel.fromDto(user);
+
+      await isar.writeTxn(() async {
+        // Save the user data (will replace existing user with same userId due to unique index)
+        await isar.userLocalModels.put(userLocalModel);
+      });
+    } catch (e) {
+      // Log error for debugging
+      throw Exception('Failed to save user: $e');
+    }
   }
 
   @override
   Future<UserDto?> getUser() async {
-    final userJson = box.get(_userKey);
-    if (userJson == null) return null;
-
     try {
-      final Map<String, dynamic> userMap = json.decode(userJson);
-      return UserDto.fromJson(userMap);
+      final isar = localDb.getDb();
+      final userLocalModel = await isar.userLocalModels.where().findFirst();
+
+      if (userLocalModel == null) return null;
+
+      return userLocalModel.toDto();
     } catch (e) {
+      // Log error for debugging
       return null;
     }
   }
 
   @override
   Future<void> clearUser() async {
-    await box.delete(_userKey);
+    try {
+      final isar = localDb.getDb();
+
+      await isar.writeTxn(() async {
+        await isar.userLocalModels.clear();
+      });
+    } catch (e) {
+      // Log error for debugging
+      throw Exception('Failed to clear user: $e');
+    }
   }
 }

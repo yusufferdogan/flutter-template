@@ -52,7 +52,6 @@ import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
 
 final injector = GetIt.instance;
 
@@ -71,10 +70,6 @@ Future<void> initSingletons() async {
 
   //initiating db
   await injector<LocalDb>().initDb();
-
-  //Initialize Hive for auth
-  final authBox = await Hive.openBox('auth_box');
-  injector.registerLazySingleton<Box>(() => authBox);
 }
 
 void provideDataSources() {
@@ -95,15 +90,14 @@ void provideDataSources() {
   injector.registerFactory<BookmarkLocalDataSource>(
       () => BookmarkLocalDataSourceImpl(localDb: injector.get<LocalDb>()));
 
-
   //Notification
   injector.registerFactory<NotificationsLocalDataSource>(
-          () => NotificationsLocalDataSourceImpl(localDb: injector.get<LocalDb>()));
+      () => NotificationsLocalDataSourceImpl(localDb: injector.get<LocalDb>()));
 
   //Authentication
   injector.registerFactory<AuthLocalDataSource>(() => AuthLocalDataSourceImpl(
       secureStorage: injector.get<FlutterSecureStorage>(),
-      box: injector.get<Box>()));
+      localDb: injector.get<LocalDb>()));
   injector.registerFactory<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(
       dio: (injector.get<NetworkService>() as DioNetworkService).dio,
       baseUrl: 'https://api.example.com'));
@@ -118,7 +112,8 @@ void provideRepositories() {
   //MovieDetail
   injector.registerFactory<MovieDetailRepository>(() =>
       MovieDetailRepositoryImpl(
-          movieDetailRemoteDataSource: injector.get<MovieDetailRemoteDataSource>(),
+          movieDetailRemoteDataSource:
+              injector.get<MovieDetailRemoteDataSource>(),
           movieDetailLocalDataSource:
               injector.get<MovieDetailLocalDataSource>()));
 
@@ -126,10 +121,11 @@ void provideRepositories() {
   injector.registerFactory<BookmarkRepository>(() => BookmarkRepositoryImpl(
       bookmarkLocalDataSource: injector.get<BookmarkLocalDataSource>()));
 
-
   //Notification
-  injector.registerFactory<NotificationRepository>(() => NotificationRepositoryImpl(
-      notificationsLocalDataSource: injector.get<NotificationsLocalDataSource>()));
+  injector.registerFactory<NotificationRepository>(() =>
+      NotificationRepositoryImpl(
+          notificationsLocalDataSource:
+              injector.get<NotificationsLocalDataSource>()));
 
   //Authentication
   injector.registerFactory<AuthRepository>(() => AuthRepositoryImpl(
@@ -141,35 +137,58 @@ void provideRepositories() {
 
 void provideUseCases() {
   //home
-  injector.registerFactory<FetchAndCacheGenreUseCase>(() => FetchAndCacheGenreUseCase(homeRepository: injector.get<HomeRepository>()));
-  injector.registerFactory<FetchAndCacheMoviesUseCase>(() => FetchAndCacheMoviesUseCase(homeRepository: injector.get<HomeRepository>()));
-  injector.registerFactory<FetchCacheGenresUseCase>(() => FetchCacheGenresUseCase(homeRepository: injector.get<HomeRepository>()));
-  injector.registerFactory<FetchCachedMoviesUseCase>(() => FetchCachedMoviesUseCase(homeRepository: injector.get<HomeRepository>()));
+  injector.registerFactory<FetchAndCacheGenreUseCase>(() =>
+      FetchAndCacheGenreUseCase(
+          homeRepository: injector.get<HomeRepository>()));
+  injector.registerFactory<FetchAndCacheMoviesUseCase>(() =>
+      FetchAndCacheMoviesUseCase(
+          homeRepository: injector.get<HomeRepository>()));
+  injector.registerFactory<FetchCacheGenresUseCase>(() =>
+      FetchCacheGenresUseCase(homeRepository: injector.get<HomeRepository>()));
+  injector.registerFactory<FetchCachedMoviesUseCase>(() =>
+      FetchCachedMoviesUseCase(homeRepository: injector.get<HomeRepository>()));
 
   //MovieDetail
-  injector.registerFactory<AddBookmarkUseCase>(() => AddBookmarkUseCase(movieDetailRepository: injector.get<MovieDetailRepository>()));
-  injector.registerFactory<GetCastsUseCase>(() => GetCastsUseCase(movieDetailRepository: injector.get<MovieDetailRepository>()));
-  injector.registerFactory<GetMovieDetailsUseCase>(() => GetMovieDetailsUseCase(movieDetailRepository: injector.get<MovieDetailRepository>()));
-  injector.registerFactory<IsBookmarkedUseCase>(() => IsBookmarkedUseCase(movieDetailRepository: injector.get<MovieDetailRepository>()));
-  injector.registerFactory<RemoveBookmarkUseCase>(() => RemoveBookmarkUseCase(movieDetailRepository: injector.get<MovieDetailRepository>()));
-  injector.registerFactory(() => GetVideosUseCase(movieDetailRemoteDataSource: injector.get<MovieDetailRemoteDataSource>()));
+  injector.registerFactory<AddBookmarkUseCase>(() => AddBookmarkUseCase(
+      movieDetailRepository: injector.get<MovieDetailRepository>()));
+  injector.registerFactory<GetCastsUseCase>(() => GetCastsUseCase(
+      movieDetailRepository: injector.get<MovieDetailRepository>()));
+  injector.registerFactory<GetMovieDetailsUseCase>(() => GetMovieDetailsUseCase(
+      movieDetailRepository: injector.get<MovieDetailRepository>()));
+  injector.registerFactory<IsBookmarkedUseCase>(() => IsBookmarkedUseCase(
+      movieDetailRepository: injector.get<MovieDetailRepository>()));
+  injector.registerFactory<RemoveBookmarkUseCase>(() => RemoveBookmarkUseCase(
+      movieDetailRepository: injector.get<MovieDetailRepository>()));
+  injector.registerFactory(() => GetVideosUseCase(
+      movieDetailRemoteDataSource:
+          injector.get<MovieDetailRemoteDataSource>()));
 
   //Bookmarks
-  injector.registerFactory<GetBookmarksUseCase>(() => GetBookmarksUseCase(bookmarkRepository: injector.get<BookmarkRepository>()));
+  injector.registerFactory<GetBookmarksUseCase>(() => GetBookmarksUseCase(
+      bookmarkRepository: injector.get<BookmarkRepository>()));
   // injector.registerFactory<RemoveBookmarkUseCase>(() => RemoveBookmarkUseCase(bookmarkRepository: injector.get<BookmarkRepository>()));
 
-
   //Notifications
-  injector.registerFactory<GetAllNotificationsUseCase>(() => GetAllNotificationsUseCase(notificationRepository: injector.get<NotificationRepository>()));
-  injector.registerFactory<ClearAllNotificationsUseCase>(() => ClearAllNotificationsUseCase(notificationRepository: injector.get<NotificationRepository>()));
+  injector.registerFactory<GetAllNotificationsUseCase>(() =>
+      GetAllNotificationsUseCase(
+          notificationRepository: injector.get<NotificationRepository>()));
+  injector.registerFactory<ClearAllNotificationsUseCase>(() =>
+      ClearAllNotificationsUseCase(
+          notificationRepository: injector.get<NotificationRepository>()));
 
   //Authentication
-  injector.registerFactory<SignUpUseCase>(() => SignUpUseCase(injector.get<AuthRepository>()));
-  injector.registerFactory<SignInUseCase>(() => SignInUseCase(injector.get<AuthRepository>()));
-  injector.registerFactory<SignInWithGoogleUseCase>(() => SignInWithGoogleUseCase(injector.get<AuthRepository>()));
-  injector.registerFactory<SignInWithAppleUseCase>(() => SignInWithAppleUseCase(injector.get<AuthRepository>()));
-  injector.registerFactory<SignOutUseCase>(() => SignOutUseCase(injector.get<AuthRepository>()));
-  injector.registerFactory<ResetPasswordUseCase>(() => ResetPasswordUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignUpUseCase>(
+      () => SignUpUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignInUseCase>(
+      () => SignInUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignInWithGoogleUseCase>(
+      () => SignInWithGoogleUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignInWithAppleUseCase>(
+      () => SignInWithAppleUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<SignOutUseCase>(
+      () => SignOutUseCase(injector.get<AuthRepository>()));
+  injector.registerFactory<ResetPasswordUseCase>(
+      () => ResetPasswordUseCase(injector.get<AuthRepository>()));
 }
 
 void provideBlocs() {
@@ -183,4 +202,3 @@ void provideBlocs() {
       resetPasswordUseCase: injector.get<ResetPasswordUseCase>(),
       authRepository: injector.get<AuthRepository>()));
 }
-

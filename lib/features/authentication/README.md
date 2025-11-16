@@ -7,6 +7,7 @@ This module handles user registration, login, OAuth authentication (Google and A
 The module follows Clean Architecture principles with three main layers:
 
 ### Domain Layer
+
 - **Entities**: `User`, `AuthFailure`
 - **Repository Interface**: `AuthRepository`
 - **Use Cases**:
@@ -18,6 +19,7 @@ The module follows Clean Architecture principles with three main layers:
   - `ResetPasswordUseCase`
 
 ### Data Layer
+
 - **Data Sources**:
   - `AuthRemoteDataSource`: Handles API calls
   - `AuthLocalDataSource`: Manages local token storage and user caching
@@ -25,6 +27,7 @@ The module follows Clean Architecture principles with three main layers:
 - **Repository Implementation**: `AuthRepositoryImpl`
 
 ### Presentation Layer
+
 - **BLoC**: `AuthenticationBloc` with events and states
 - **Screens**:
   - `WelcomeScreen`: Initial landing screen
@@ -39,21 +42,25 @@ The module follows Clean Architecture principles with three main layers:
 ## Features
 
 1. **Email/Password Authentication**
+
    - User registration with validation
    - Login with email and password
    - Password reset functionality
 
 2. **OAuth Authentication**
+
    - Google Sign-In
    - Apple Sign-In
 
 3. **Session Management**
+
    - Secure token storage using Flutter Secure Storage
-   - User data caching with Hive
+   - User data caching with Isar
    - Automatic token refresh
    - Persistent login sessions
 
 4. **Validation**
+
    - Email format validation
    - Password strength requirements (minimum 8 characters)
    - Real-time form validation
@@ -76,8 +83,8 @@ dependencies:
   google_sign_in: ^6.1.6
   sign_in_with_apple: ^5.0.0
   flutter_secure_storage: ^9.0.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
   flutter_bloc: ^8.1.3
   freezed_annotation: ^2.4.1
   dartz: ^0.10.1
@@ -190,7 +197,7 @@ injector.registerFactory<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(
 - Tokens are stored securely using Flutter Secure Storage
 - Passwords are never stored on the client
 - OAuth flows use PKCE for enhanced security
-- User data is cached locally using Hive with encryption
+- User data is cached locally using Isar
 
 ## Testing
 
